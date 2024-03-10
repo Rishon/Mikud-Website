@@ -1,0 +1,34 @@
+name: Deploy and Build
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy using SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /home/Mikud
+
+            if [ ! -d "Mikud" ]; then
+            gh repo clone SelaDevelopment/Mikud Mikud
+              cd Mikud
+            else
+              cd Mikud
+              git pull origin
+            fi
+
+            yarn install
+            yarn build
+            pm2 restart service-mikud --update-env
