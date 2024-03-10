@@ -1,23 +1,53 @@
+import { SetStateAction, useEffect, useState } from "react";
 import Layout from "../components/layout";
+import PostOfficeAPI from "../components/PostOfficeAPI";
 
 export default function Home() {
-  
-  async function clearForm() {
-    let city = document.getElementById("city") as HTMLInputElement;
-    let streetAddress = document.getElementById(
-      "street-address"
-    ) as HTMLInputElement;
-    let houseNumber = document.getElementById(
-      "house-number"
-    ) as HTMLInputElement;
-    let entranceNumber = document.getElementById(
-      "entrance-number"
-    ) as HTMLInputElement;
+  // Local Storage
+  const [cacheData, setCacheData] = useState([]);
 
-    city.value = "";
-    streetAddress.value = "";
-    houseNumber.value = "";
-    entranceNumber.value = "";
+  // City Info
+  const [city, setCity] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
+  const [entranceNumber, setEntranceNumber] = useState("");
+
+  useEffect(() => {
+    const storedJsonData = localStorage.getItem("mikudData");
+    if (storedJsonData) {
+      setCacheData(JSON.parse(storedJsonData));
+    }
+  }, []);
+
+  async function clearForm() {
+    setCity("");
+    setStreetAddress("");
+    setHouseNumber("");
+    setEntranceNumber("");
+
+    // Update inputs
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach((input) => {
+      input.value = "";
+    });
+  }
+
+  async function submitForm() {
+    console.log(city, streetAddress, houseNumber, entranceNumber);
+    await PostOfficeAPI(city, streetAddress, houseNumber, entranceNumber);
+
+    let json: any = {
+      city: city,
+      streetAddress: streetAddress,
+      houseNumber: houseNumber,
+      entranceNumber: entranceNumber,
+    };
+
+    const updatedCacheData = [...cacheData, json];
+
+    localStorage.setItem("mikudData", JSON.stringify(updatedCacheData));
+    setCacheData(updatedCacheData as any);
+    clearForm();
   }
 
   return (
@@ -37,6 +67,7 @@ export default function Home() {
               name="city"
               className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
               placeholder="Enter city"
+              onChange={(e) => setCity(e.target.value)}
             />
           </div>
           <div className="mb-4">
@@ -52,6 +83,7 @@ export default function Home() {
               name="street-address"
               className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
               placeholder="Enter street address"
+              onChange={(e) => setStreetAddress(e.target.value)}
             />
           </div>
           <div className="mb-4">
@@ -67,6 +99,7 @@ export default function Home() {
               name="house-number"
               className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
               placeholder="Enter house number"
+              onChange={(e) => setHouseNumber(e.target.value)}
             />
           </div>
           <div className="mb-4">
@@ -74,18 +107,22 @@ export default function Home() {
               htmlFor="entrance-number"
               className="block text-sm font-medium text-white-700"
             >
-              Entrance Number | מספר כניסה
+              Entrance Number | כניסה
             </label>
             <input
               type="number"
               id="entrance-number"
               name="entrance-number"
               className="mt-1 p-2 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm text-black"
-              placeholder="Enter entrance number"
+              placeholder="Enter entrance"
+              onChange={(e) => setEntranceNumber(e.target.value)}
             />
           </div>
           <div className="flex space-x-4">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+              onClick={submitForm}
+            >
               Find Zip Code
             </button>
             <button

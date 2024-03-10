@@ -1,19 +1,24 @@
 import axios from "axios";
 
-const apiUrl = "https://israelpost.co.il/umbraco/Surface/Zip/FindZip";
+const apiUrl = "https://www.zipy.co.il/api/findzip/getZip";
 
-const requestBody = {
-  name: "John Doe",
-  email: "johndoe@example.com",
-};
+export default async function getZipCode(
+  city: string,
+  street: string,
+  house: string,
+  entrance: string
+) {
+  const requestBody = {
+    city: city,
+    house: house + entrance,
+    remote: true,
+    street: street,
+  };
 
-axios
-  .post(apiUrl, requestBody)
-  .then((response: { data: any }) => {
-    // Handle the response here
-    console.log(response.data);
-  })
-  .catch((error: any) => {
-    // Handle any errors here
+  try {
+    const response = await axios.post(apiUrl, requestBody);
+    return response.data;
+  } catch (error) {
     console.error(error);
-  });
+  }
+}
