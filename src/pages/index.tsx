@@ -33,21 +33,37 @@ export default function Home() {
   }
 
   async function submitForm() {
-    console.log(city, streetAddress, houseNumber, entranceNumber);
-    await PostOfficeAPI(city, streetAddress, houseNumber, entranceNumber);
+    const zipCode = await PostOfficeAPI(
+      city,
+      streetAddress,
+      houseNumber,
+      entranceNumber
+    );
+
+    if (!zipCode.success || zipCode.result == undefined) {
+      alert("No zip code found, please try again.");
+      return;
+    }
 
     let json: any = {
       city: city,
       streetAddress: streetAddress,
       houseNumber: houseNumber,
       entranceNumber: entranceNumber,
+      zipCode: zipCode.result.zip,
     };
 
-    const updatedCacheData = [...cacheData, json];
+    let slicedCache: any[] = [];
+
+    if (cacheData.length >= 5) {
+      while (cacheData.length > 5) cacheData.pop(); // In case of more than 5 items
+      slicedCache = cacheData.slice(1, 5); // Remove the first item
+    }
+
+    const updatedCacheData = [...slicedCache, json];
 
     localStorage.setItem("mikudData", JSON.stringify(updatedCacheData));
     setCacheData(updatedCacheData as any);
-    clearForm();
   }
 
   return (
@@ -131,6 +147,29 @@ export default function Home() {
             >
               Clear Form
             </button>
+          </div>
+          <div>
+            <h2 className="text-lg font-bold mb-2">
+              Recent Looked Up Zip Codes:
+            </h2>
+            <ul>
+              {(
+                cacheData.slice(0, 5) as {
+                  city: string;
+                  streetAddress: string;
+                  houseNumber: string;
+                  entranceNumber: string;
+                  zipCode: string;
+                }[]
+              ).map((item, index) =>
+                item.city === "" ? null : (
+                  <li key={index}>
+                    {item.city}, {item.streetAddress}, {item.entranceNumber}
+                    {item.houseNumber} {"(מיקוד: " + item.zipCode + ")"}
+                  </li>
+                )
+              )}
+            </ul>
           </div>
         </div>
       </main>
