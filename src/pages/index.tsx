@@ -58,6 +58,8 @@ export default function Home() {
     if (cacheData.length >= 5) {
       while (cacheData.length > 5) cacheData.pop(); // In case of more than 5 items
       slicedCache = cacheData.slice(1, 5); // Remove the first item
+    } else {
+      slicedCache = cacheData;
     }
 
     const updatedCacheData = [...slicedCache, json];
