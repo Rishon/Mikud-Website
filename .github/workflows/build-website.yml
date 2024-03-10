@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /home/Mikud
+            cd /home
 
             if [ ! -d "Mikud" ]; then
             gh repo clone SelaDevelopment/Mikud Mikud
