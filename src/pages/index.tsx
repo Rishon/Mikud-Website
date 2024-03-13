@@ -45,12 +45,7 @@ export default function Home() {
       document.getElementById("entranceInput") as HTMLInputElement
     ).value;
 
-    if (
-      city === "" ||
-      streetAddress === "" ||
-      houseNumber === "" ||
-      entranceNumber === ""
-    ) {
+    if (city === "" || streetAddress === "" || houseNumber === "") {
       toast.error(".אנא מלאו את כל השדות");
       setLoading(false);
       return;
