@@ -33,6 +33,7 @@ export default function Home() {
 
   async function submitForm() {
     setLoading(true);
+    setZipCode("");
     const city = (document.getElementById("cityInput") as HTMLInputElement)
       .value;
     const streetAddress = (

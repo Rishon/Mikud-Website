@@ -15,10 +15,13 @@ const AddressLayout = () => {
   >([]);
 
   useEffect(() => {
-    const storedJsonData = localStorage.getItem("mikudData");
-    if (storedJsonData) {
-      setCacheData(JSON.parse(storedJsonData));
-    }
+    setInterval(() => {
+      const storedJsonData = localStorage.getItem("mikudData");
+      if (storedJsonData) {
+        setCacheData(JSON.parse(storedJsonData));
+        console.log("update");
+      }
+    }, 2000);
   }, []);
 
   async function copyToKeyboard(element: any) {
@@ -48,12 +51,14 @@ const AddressLayout = () => {
           style={{
             backgroundColor: "#fff",
             width: "90%",
-            height: "35%",
             borderRadius: "8px",
             border: "1px solid #101057",
             padding: "24px",
             position: "absolute",
             top: "10%",
+            maxHeight: "35%",
+            minHeight: "20%",
+            overflowY: "auto",
           }}
         >
           {/* Title */}
@@ -86,15 +91,7 @@ const AddressLayout = () => {
               listStyle: "none",
             }}
           >
-            {(
-              cacheData.slice(0, 5) as {
-                city: string;
-                streetAddress: string;
-                houseNumber: string;
-                entranceNumber: string;
-                zipCode: string;
-              }[]
-            ).map((item, index) =>
+            {cacheData.slice(0, 5).map((item, index) =>
               item.city === "" ? null : (
                 <li
                   key={index}
