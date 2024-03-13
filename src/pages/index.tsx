@@ -5,10 +5,14 @@ import { loadDataStore, getZipCode } from "../components/PostOfficeAPI";
 import Layout from "../components/layout";
 import AddressInput from "../components/AddressInput";
 import RecentZipCodes from "../components/RecentZipCodes";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Home() {
   // Local Storage
   const [cacheData, setCacheData] = useState([]);
+
+  // Loading
+  const [loading, setLoading] = useState(false);
 
   // Result
   const [zipCode, setZipCode] = useState("");
@@ -19,6 +23,7 @@ export default function Home() {
       setCacheData(JSON.parse(storedJsonData));
     }
     loadDataStore(null);
+    setLoading(false);
   }, []);
 
   async function copyToKeyboard() {
@@ -27,6 +32,7 @@ export default function Home() {
   }
 
   async function submitForm() {
+    setLoading(true);
     const city = (document.getElementById("cityInput") as HTMLInputElement)
       .value;
     const streetAddress = (
@@ -39,57 +45,74 @@ export default function Home() {
       document.getElementById("entranceInput") as HTMLInputElement
     ).value;
 
-    const zipCode = await getZipCode(
-      city,
-      streetAddress,
-      houseNumber,
-      entranceNumber
-    );
-
-    if (!zipCode.success || zipCode.result == undefined) {
-      alert("No zip code found, please try again.");
+    if (
+      city === "" ||
+      streetAddress === "" ||
+      houseNumber === "" ||
+      entranceNumber === ""
+    ) {
+      toast.error(".אנא מלאו את כל השדות");
+      setLoading(false);
       return;
     }
 
-    setZipCode(zipCode.result.zip);
+    try {
+      const zipCode = await getZipCode(
+        city,
+        streetAddress,
+        houseNumber,
+        entranceNumber
+      );
 
-    let json: any = {
-      city: city,
-      streetAddress: streetAddress,
-      houseNumber: houseNumber,
-      entranceNumber: entranceNumber,
-      zipCode: zipCode.result.zip,
-    };
+      if (!zipCode.success || zipCode.result == undefined) {
+        toast.error(".לא נמצא מיקוד, אנא נסו שנית");
+        return;
+      }
 
-    let slicedCache: any[] = cacheData;
+      setZipCode(zipCode.result.zip);
 
-    if (cacheData.length >= 5) {
-      while (cacheData.length > 5) cacheData.pop(); // In case of more than 5 items
-      slicedCache = cacheData.slice(1, 5); // Remove the first item
-    }
+      let json: any = {
+        city: city,
+        streetAddress: streetAddress,
+        houseNumber: houseNumber,
+        entranceNumber: entranceNumber,
+        zipCode: zipCode.result.zip,
+      };
 
-    // If the item is already in the cache, return
-    if (cacheData.length > 0) {
-      for (let i = 0; i < cacheData.length; i++) {
-        if (
-          JSON.stringify(cacheData[i]) ===
-          JSON.stringify({
-            city: city,
-            streetAddress: streetAddress,
-            houseNumber: houseNumber,
-            entranceNumber: entranceNumber,
-            zipCode: zipCode.result.zip,
-          })
-        ) {
-          return;
+      let slicedCache: any[] = cacheData;
+
+      if (cacheData.length >= 5) {
+        while (cacheData.length > 5) cacheData.pop(); // In case of more than 5 items
+        slicedCache = cacheData.slice(1, 5); // Remove the first item
+      }
+
+      // If the item is already in the cache, return
+      if (cacheData.length > 0) {
+        for (let i = 0; i < cacheData.length; i++) {
+          if (
+            JSON.stringify(cacheData[i]) ===
+            JSON.stringify({
+              city: city,
+              streetAddress: streetAddress,
+              houseNumber: houseNumber,
+              entranceNumber: entranceNumber,
+              zipCode: zipCode.result.zip,
+            })
+          ) {
+            return;
+          }
         }
       }
+
+      const updatedCacheData = [...slicedCache, json];
+
+      localStorage.setItem("mikudData", JSON.stringify(updatedCacheData));
+      setCacheData(updatedCacheData as any);
+    } catch (error) {
+      toast.error(".התרחש שגיאה במהלך הבקשה, אנא נסו שנית");
+    } finally {
+      setLoading(false);
     }
-
-    const updatedCacheData = [...slicedCache, json];
-
-    localStorage.setItem("mikudData", JSON.stringify(updatedCacheData));
-    setCacheData(updatedCacheData as any);
   }
 
   return (
@@ -160,8 +183,12 @@ export default function Home() {
                 backgroundColor: "#3300EE",
                 color: "#fff",
                 fontSize: "16px",
+                opacity: loading ? 0.5 : 1,
+                transition: "background-color 0.3s",
+                cursor: "pointer",
               }}
               onClick={submitForm}
+              disabled={loading}
             >
               {"חפש מיקוד"}
             </button>
@@ -185,6 +212,7 @@ export default function Home() {
           </div>
         </div>
         <RecentZipCodes />
+        <Toaster />
       </main>
     </Layout>
   );

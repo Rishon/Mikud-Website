@@ -63,8 +63,12 @@ export async function getCitySearchResults(pattern: string) {
 }
 
 export async function getStreetSearchResults(city: string, pattern: string) {
-  const results = (STREET_DATASTORE as any[]).filter((record: any) => {
-    return record["שם_רחוב"].includes(pattern);
-  });
-  return results;
+  try {
+    const results = (STREET_DATASTORE as any[]).filter((record: any) => {
+      return record["שם_רחוב"].includes(pattern);
+    });
+    return results;
+  } catch (error) {
+    console.error(error);
+  }
 }

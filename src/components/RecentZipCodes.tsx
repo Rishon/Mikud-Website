@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 
+// Icons
+import { MdOutlineContentCopy } from "react-icons/md";
+
 const AddressLayout = () => {
-  const [cacheData, setCacheData] = useState([]);
+  const [cacheData, setCacheData] = useState<
+    {
+      city: string;
+      streetAddress: string;
+      houseNumber: string;
+      entranceNumber: string;
+      zipCode: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const storedJsonData = localStorage.getItem("mikudData");
@@ -10,6 +21,12 @@ const AddressLayout = () => {
     }
   }, []);
 
+  async function copyToKeyboard(element: any) {
+    let zipCode = cacheData[element].zipCode;
+    if (zipCode === "") return;
+    await navigator.clipboard.writeText(zipCode);
+  }
+
   return (
     <>
       {/* Last ZipCodes Background */}
@@ -17,7 +34,7 @@ const AddressLayout = () => {
         className="h-1440 flex items-center justify-center"
         style={{
           backgroundColor: "var(--footer-black)",
-          width: "400px",
+          width: "450px",
           height: "100%",
           position: "absolute",
           bottom: 0,
@@ -30,8 +47,8 @@ const AddressLayout = () => {
         <div
           style={{
             backgroundColor: "#fff",
-            width: "352px",
-            height: "264px",
+            width: "90%",
+            height: "35%",
             borderRadius: "8px",
             border: "1px solid #101057",
             padding: "24px",
@@ -79,9 +96,23 @@ const AddressLayout = () => {
               }[]
             ).map((item, index) =>
               item.city === "" ? null : (
-                <li key={index} style={{ marginBottom: "5px" }}>
+                <li
+                  key={index}
+                  style={{
+                    marginBottom: "10px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <MdOutlineContentCopy
+                    onClick={() => {
+                      copyToKeyboard(index);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  />
                   {item.city}, {item.streetAddress}, {item.entranceNumber}
-                  {item.houseNumber} {"(מיקוד: " + item.zipCode + ")"} ▪
+                  {item.houseNumber} {"(" + item.zipCode + ")"} ▪
                 </li>
               )
             )}

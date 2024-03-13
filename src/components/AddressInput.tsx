@@ -8,7 +8,8 @@ import {
 } from "../components/PostOfficeAPI";
 
 // Icons
-import { IoLocationSharp, IoReader } from "react-icons/io5";
+import { IoLocationSharp } from "react-icons/io5";
+import { BsFillSignpost2Fill } from "react-icons/bs";
 import { FaHouse } from "react-icons/fa6";
 import { FaLocationArrow } from "react-icons/fa";
 
@@ -171,9 +172,8 @@ const AddressLayout = () => {
                   street
                 );
 
-                let streetResults: string[] = results.map(
-                  (result: any) => result.שם_רחוב
-                );
+                let streetResults: string[] =
+                  results?.map((result: any) => result.שם_רחוב) ?? [];
                 setStreetResults(streetResults);
                 handleStreetFocus();
               }}
@@ -266,7 +266,7 @@ const AddressLayout = () => {
                 transform: "translateY(-50%)",
               }}
             >
-              <IoReader />
+              <BsFillSignpost2Fill />
             </div>
           </div>
         </div>
