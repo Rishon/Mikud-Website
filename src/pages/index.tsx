@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 
 // Components
-import {
-  getZipCode,
-  getCitySearchResults,
-  getStreetSearchResults,
-} from "../components/PostOfficeAPI";
+import { loadDataStore, getZipCode } from "../components/PostOfficeAPI";
 import Layout from "../components/layout";
 import AddressInput from "../components/AddressInput";
 import RecentZipCodes from "../components/RecentZipCodes";
@@ -14,33 +10,35 @@ export default function Home() {
   // Local Storage
   const [cacheData, setCacheData] = useState([]);
 
-  // City Info
-  const [city, setCity] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
-  const [houseNumber, setHouseNumber] = useState("");
-  const [entranceNumber, setEntranceNumber] = useState("");
+  // Result
+  const [zipCode, setZipCode] = useState("");
 
   useEffect(() => {
     const storedJsonData = localStorage.getItem("mikudData");
     if (storedJsonData) {
       setCacheData(JSON.parse(storedJsonData));
     }
+    loadDataStore(null);
   }, []);
 
-  async function clearForm() {
-    setCity("");
-    setStreetAddress("");
-    setHouseNumber("");
-    setEntranceNumber("");
-
-    // Update inputs
-    const inputs = document.querySelectorAll("input");
-    inputs.forEach((input) => {
-      input.value = "";
-    });
+  async function copyToKeyboard() {
+    if (zipCode === "") return;
+    await navigator.clipboard.writeText(zipCode);
   }
 
   async function submitForm() {
+    const city = (document.getElementById("cityInput") as HTMLInputElement)
+      .value;
+    const streetAddress = (
+      document.getElementById("streetInput") as HTMLInputElement
+    ).value;
+    const houseNumber = (
+      document.getElementById("houseNumberInput") as HTMLInputElement
+    ).value;
+    const entranceNumber = (
+      document.getElementById("entranceInput") as HTMLInputElement
+    ).value;
+
     const zipCode = await getZipCode(
       city,
       streetAddress,
@@ -52,6 +50,8 @@ export default function Home() {
       alert("No zip code found, please try again.");
       return;
     }
+
+    setZipCode(zipCode.result.zip);
 
     let json: any = {
       city: city,
@@ -66,6 +66,24 @@ export default function Home() {
     if (cacheData.length >= 5) {
       while (cacheData.length > 5) cacheData.pop(); // In case of more than 5 items
       slicedCache = cacheData.slice(1, 5); // Remove the first item
+    }
+
+    // If the item is already in the cache, return
+    if (cacheData.length > 0) {
+      for (let i = 0; i < cacheData.length; i++) {
+        if (
+          JSON.stringify(cacheData[i]) ===
+          JSON.stringify({
+            city: city,
+            streetAddress: streetAddress,
+            houseNumber: houseNumber,
+            entranceNumber: entranceNumber,
+            zipCode: zipCode.result.zip,
+          })
+        ) {
+          return;
+        }
+      }
     }
 
     const updatedCacheData = [...slicedCache, json];
@@ -143,11 +161,13 @@ export default function Home() {
                 color: "#fff",
                 fontSize: "16px",
               }}
+              onClick={submitForm}
             >
               {"חפש מיקוד"}
             </button>
 
             <button
+              onClick={copyToKeyboard}
               style={{
                 width: "240px",
                 height: "32px",
@@ -160,7 +180,7 @@ export default function Home() {
                 fontFamily: "IBMPlexSans-Regular",
               }}
             >
-              {":המיקוד שלך הוא"}
+              {zipCode + " :המיקוד שלך הוא"}
             </button>
           </div>
         </div>

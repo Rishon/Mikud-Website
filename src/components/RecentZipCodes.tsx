@@ -1,11 +1,15 @@
-import React from "react";
-
-// Icons
-import { IoLocationSharp, IoReader } from "react-icons/io5";
-import { FaHouse } from "react-icons/fa6";
-import { FaLocationArrow } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
 
 const AddressLayout = () => {
+  const [cacheData, setCacheData] = useState([]);
+
+  useEffect(() => {
+    const storedJsonData = localStorage.getItem("mikudData");
+    if (storedJsonData) {
+      setCacheData(JSON.parse(storedJsonData));
+    }
+  }, []);
+
   return (
     <>
       {/* Last ZipCodes Background */}
@@ -62,9 +66,25 @@ const AddressLayout = () => {
               fontSize: "16px",
               fontFamily: "IBMPlexSans-Regular",
               textAlign: "right",
+              listStyle: "none",
             }}
           >
-            {"עיר, רחוב מס' בית, כניסה, מיקוד"}
+            {(
+              cacheData.slice(0, 5) as {
+                city: string;
+                streetAddress: string;
+                houseNumber: string;
+                entranceNumber: string;
+                zipCode: string;
+              }[]
+            ).map((item, index) =>
+              item.city === "" ? null : (
+                <li key={index} style={{ marginBottom: "5px" }}>
+                  {item.city}, {item.streetAddress}, {item.entranceNumber}
+                  {item.houseNumber} {"(מיקוד: " + item.zipCode + ")"} ▪
+                </li>
+              )
+            )}
           </div>
         </div>
       </div>
