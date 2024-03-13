@@ -29,6 +29,7 @@ export default function Home() {
   async function copyToKeyboard() {
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
+    toast.success("!המיקוד הועתק בהצלחה");
   }
 
   async function submitForm() {

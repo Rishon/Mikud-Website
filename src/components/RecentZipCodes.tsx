@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 
+// Toast
+import toast, { Toaster } from "react-hot-toast";
+
 // Icons
 import { MdOutlineContentCopy } from "react-icons/md";
 
@@ -17,10 +20,7 @@ const AddressLayout = () => {
   useEffect(() => {
     setInterval(() => {
       const storedJsonData = localStorage.getItem("mikudData");
-      if (storedJsonData) {
-        setCacheData(JSON.parse(storedJsonData));
-        console.log("update");
-      }
+      if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
     }, 2000);
   }, []);
 
@@ -28,6 +28,7 @@ const AddressLayout = () => {
     let zipCode = cacheData[element].zipCode;
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
+    toast.success("!המיקוד הועתק בהצלחה");
   }
 
   return (
