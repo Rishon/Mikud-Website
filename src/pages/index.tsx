@@ -5,11 +5,11 @@ import {
   getZipCode,
   getCitySearchResults,
   getStreetSearchResults,
-} from "@/components/PostOfficeAPI";
-import Layout from "@/components/Layout";
-import Footer from "@/components/Footer";
-import AddressInput from "@/components/AddressInput";
-import RecentZipCodes from "@/components/RecentZipCodes";
+} from "../components/PostOfficeAPI";
+import Layout from "../components/layout";
+import Footer from "../components/footer";
+import AddressInput from "../components/AddressInput";
+import RecentZipCodes from "../components/RecentZipCodes";
 
 export default function Home() {
   // Local Storage
