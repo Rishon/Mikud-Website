@@ -33,7 +33,7 @@ const Footer = () => {
             <Link href="https://rishon.systems" target="_blank">
               rishon.systems
             </Link>{" "}
-            © 2024-{new Date().getFullYear()} All Rights Reserved
+            © 2024 All Rights Reserved
           </code>
         </div>
 
