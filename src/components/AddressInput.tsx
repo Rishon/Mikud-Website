@@ -13,7 +13,7 @@ const AddressLayout = () => {
         style={{
           position: "absolute",
           top: "50%",
-          right: "50%",
+          right: "51%",
           transform: "translate(50%, -50%)",
           display: "flex",
           flexDirection: "row-reverse",
@@ -27,6 +27,7 @@ const AddressLayout = () => {
             <input
               type="text"
               placeholder="ישוב / עיר"
+              maxLength={8}
               style={{
                 width: "171px",
                 height: "32px",
@@ -60,6 +61,7 @@ const AddressLayout = () => {
             <input
               type="text"
               placeholder="רחוב"
+              maxLength={8}
               style={{
                 width: "171px",
                 height: "32px",
@@ -93,6 +95,7 @@ const AddressLayout = () => {
             <input
               type="text"
               placeholder="מס' בית"
+              maxLength={2}
               style={{
                 width: "171px",
                 height: "32px",
@@ -126,6 +129,7 @@ const AddressLayout = () => {
             <input
               type="text"
               placeholder="כניסה (אם יש)"
+              maxLength={2}
               style={{
                 width: "171px",
                 height: "32px",

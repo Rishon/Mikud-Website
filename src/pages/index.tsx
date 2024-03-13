@@ -7,7 +7,6 @@ import {
   getStreetSearchResults,
 } from "../components/PostOfficeAPI";
 import Layout from "../components/layout";
-import Footer from "../components/footer";
 import AddressInput from "../components/AddressInput";
 import RecentZipCodes from "../components/RecentZipCodes";
 
@@ -123,10 +122,49 @@ export default function Home() {
 
           {/* Address Input */}
           <AddressInput />
-        </div>
 
+          <div
+            style={{
+              right: "0%",
+              top: "70%",
+              position: "absolute",
+              fontFamily: "IBMPlexSans-Regular",
+              display: "flex",
+              flexDirection: "row-reverse",
+              gap: "10px",
+            }}
+          >
+            <button
+              style={{
+                width: "128px",
+                height: "32px",
+                borderRadius: "8px",
+                backgroundColor: "#3300EE",
+                color: "#fff",
+                fontSize: "16px",
+              }}
+            >
+              {"חפש מיקוד"}
+            </button>
+
+            <button
+              style={{
+                width: "240px",
+                height: "32px",
+                borderRadius: "8px",
+                backgroundColor: "#10105726",
+                textAlign: "right",
+                padding: "0 10px",
+                color: "#101057",
+                fontSize: "16px",
+                fontFamily: "IBMPlexSans-Regular",
+              }}
+            >
+              {":המיקוד שלך הוא"}
+            </button>
+          </div>
+        </div>
         <RecentZipCodes />
-        <Footer />
       </main>
     </Layout>
   );
