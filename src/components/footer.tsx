@@ -51,8 +51,6 @@ const Footer = () => {
         >
           <code>
             Web Designer: Delth
-            <br />
-            Web Developer: Rishon
             <br /> <br />
             Special Thanks:
             <br /> ▪ {""}
