@@ -68,17 +68,11 @@ const Footer = () => {
               react-icons
             </Link>
             <br /> ▪ {""}
-            <Link
-              href="https://www.zipy.co.il/"
-              target="_blank"
-            >
+            <Link href="https://www.zipy.co.il/" target="_blank">
               Zipy API
             </Link>
             <br /> ▪ {""}
-            <Link
-              href="https://info.data.gov.il/home/"
-              target="_blank"
-            >
+            <Link href="https://info.data.gov.il/home/" target="_blank">
               Data Gov
             </Link>
           </code>
