@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
 // Toast
 import toast from "react-hot-toast";
@@ -7,6 +8,9 @@ import toast from "react-hot-toast";
 import { MdOutlineContentCopy, MdDelete } from "react-icons/md";
 
 const AddressLayout = () => {
+  // IsMobile
+  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+
   const [cacheData, setCacheData] = useState<
     {
       city: string;
@@ -46,13 +50,13 @@ const AddressLayout = () => {
       <div
         className="h-1440 flex items-center justify-center"
         style={{
-          backgroundColor: "var(--footer-black)",
+          backgroundColor: isMobile ? "" : "var(--footer-black)",
           width: "450px",
           height: "100%",
           position: "absolute",
           bottom: 0,
-          right: "60%",
-          transform: "translateX(-50%)",
+          right: isMobile ? "0%" : "60%",
+          transform: isMobile ? "" : "translateX(-50%)",
           zIndex: 1,
         }}
       >
@@ -60,14 +64,15 @@ const AddressLayout = () => {
         <div
           style={{
             backgroundColor: "#fff",
-            width: "90%",
+            width: isMobile ? "70%" : "90%",
+            right: isMobile ? "7%" : "",
             borderRadius: "8px",
             border: "1px solid #101057",
             padding: "24px",
             position: "absolute",
-            top: "10%",
+            top: isMobile ? "65%" : "10%",
             maxHeight: "35%",
-            minHeight: "20%",
+            minHeight: isMobile ? "25%" : "20%",
             overflowY: "auto",
           }}
         >
@@ -148,7 +153,7 @@ const AddressLayout = () => {
           backgroundColor: "var(--divider-blue)",
           width: "100vw",
           position: "absolute",
-          bottom: "30%",
+          bottom: isMobile ? "-18%" : "30%",
           left: 0,
         }}
       ></div>
