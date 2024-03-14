@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { useMediaQuery } from "react-responsive";
 
 const Footer = () => {
+  // IsMobile
+  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+
   return (
     <>
       {/* Footer */}
@@ -10,7 +14,7 @@ const Footer = () => {
           backgroundColor: "var(--footer-black)",
           width: "100vw",
           height: "30%",
-          position: "absolute",
+          position: isMobile ? "fixed" : "absolute",
           bottom: 0,
           left: 0,
           right: 0,
@@ -40,7 +44,7 @@ const Footer = () => {
         <div
           style={{
             position: "absolute",
-            left: "30%",
+            left: isMobile ? "30%" : "30%",
             top: "10%",
             color: "white",
             fontSize: "16px",
@@ -78,8 +82,8 @@ const Footer = () => {
         <div
           style={{
             position: "absolute",
-            left: "60%",
-            top: "10%",
+            left: isMobile ? "30%" : "60%",
+            top: isMobile ? "50%" : "10%",
             color: "white",
             fontSize: "16px",
             textAlign: "left",

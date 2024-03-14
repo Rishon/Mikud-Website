@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
 // Components
 import { loadDataStore, getZipCode } from "../components/PostOfficeAPI";
@@ -8,6 +9,9 @@ import RecentZipCodes from "../components/RecentZipCodes";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Home() {
+  // IsMobile
+  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+
   // Local Storage
   const [cacheData, setCacheData] = useState([]);
 
@@ -118,7 +122,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <main className="md:flex md:justify-between md:items-center">
         {/* Main Content */}
         <div
           style={{
@@ -136,7 +140,7 @@ export default function Home() {
               color: "#101057",
               position: "absolute",
               top: "5%",
-              right: "0%",
+              right: isMobile ? "37%" : "0%",
               transform: "translateY(-50%)",
               textAlign: "center",
               fontSize: "64px",
@@ -152,7 +156,7 @@ export default function Home() {
               color: "#101057",
               position: "absolute",
               top: "25%",
-              right: "20.4%",
+              right: isMobile ? "58%" : "20.4%",
               transform: "translate(50%, -50%)",
               textAlign: "center",
               fontSize: "24px",
@@ -167,8 +171,8 @@ export default function Home() {
 
           <div
             style={{
-              right: "0%",
-              top: "70%",
+              right: isMobile ? "35%" : "0%",
+              top: isMobile ? "130%" : "70%",
               position: "absolute",
               fontFamily: "IBMPlexSans-Regular",
               display: "flex",
@@ -197,7 +201,7 @@ export default function Home() {
             <button
               onClick={copyToKeyboard}
               style={{
-                width: "240px",
+                width: isMobile ? "220px" : "240px",
                 height: "32px",
                 borderRadius: "8px",
                 backgroundColor: "#10105726",

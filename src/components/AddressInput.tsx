@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useMediaQuery } from "react-responsive";
 
 // Components
 import {
@@ -14,6 +15,9 @@ import { FaHouse } from "react-icons/fa6";
 import { FaLocationArrow } from "react-icons/fa";
 
 const AddressLayout = () => {
+  // IsMobile
+  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
+
   const [cityResult, setCityResult] = useState("" as string);
   const [cityResults, setCityResults] = useState([] as string[]);
   const [streetResults, setStreetResults] = useState([] as string[]);
@@ -55,18 +59,24 @@ const AddressLayout = () => {
       <div
         style={{
           position: "absolute",
-          top: "50%",
-          right: "51%",
+          top: isMobile ? "80%" : "50%",
+          right: isMobile ? "59%" : "51%",
           transform: "translate(50%, -50%)",
           display: "flex",
-          flexDirection: "row-reverse",
+          flexDirection: isMobile ? "column" : "row-reverse",
           alignItems: "center",
           textAlign: "right",
-          zIndex: 3,
+          zIndex: 2,
         }}
       >
         {/* City Input */}
-        <div style={{ paddingRight: "10px", position: "relative" }}>
+        <div
+          style={{
+            paddingRight: isMobile ? "0" : "10px",
+            marginBottom: isMobile ? "10px" : "0",
+            position: "relative",
+          }}
+        >
           <div style={{ position: "relative", display: "inline-block" }}>
             <input
               onFocus={async (e) => {
@@ -90,8 +100,9 @@ const AddressLayout = () => {
                 handleCityFocus();
               }}
               style={{
-                width: "171px",
-                height: "32px",
+                width: isMobile ? "200px" : "171px",
+                height: isMobile ? "40px" : "32px",
+                fontSize: isMobile ? "16px" : "14px",
                 borderRadius: "53px",
                 paddingLeft: "10px",
                 paddingRight: "35px",
@@ -150,7 +161,13 @@ const AddressLayout = () => {
         </div>
 
         {/* Street Input */}
-        <div style={{ paddingRight: "10px", position: "relative" }}>
+        <div
+          style={{
+            paddingRight: isMobile ? "0" : "10px",
+            marginBottom: isMobile ? "10px" : "0",
+            position: "relative",
+          }}
+        >
           <div style={{ position: "relative", display: "inline-block" }}>
             <input
               onFocus={async (e) => {
@@ -178,8 +195,9 @@ const AddressLayout = () => {
                 handleStreetFocus();
               }}
               style={{
-                width: "171px",
-                height: "32px",
+                width: isMobile ? "200px" : "171px",
+                height: isMobile ? "40px" : "32px",
+                fontSize: isMobile ? "16px" : "14px",
                 borderRadius: "53px",
                 paddingLeft: "10px",
                 paddingRight: "35px",
@@ -237,7 +255,13 @@ const AddressLayout = () => {
         </div>
 
         {/* House Number Input */}
-        <div style={{ paddingRight: "10px", position: "relative" }}>
+        <div
+          style={{
+            paddingRight: isMobile ? "0" : "10px",
+            marginBottom: isMobile ? "10px" : "0",
+            position: "relative",
+          }}
+        >
           <div style={{ position: "relative", display: "inline-block" }}>
             <input
               type="text"
@@ -245,8 +269,9 @@ const AddressLayout = () => {
               maxLength={2}
               id="houseNumberInput"
               style={{
-                width: "171px",
-                height: "32px",
+                width: isMobile ? "200px" : "171px",
+                height: isMobile ? "40px" : "32px",
+                fontSize: isMobile ? "16px" : "14px",
                 borderRadius: "53px",
                 paddingLeft: "10px",
                 paddingRight: "35px",
@@ -272,7 +297,13 @@ const AddressLayout = () => {
         </div>
 
         {/* Entrance Input */}
-        <div style={{ paddingRight: "10px", position: "relative" }}>
+        <div
+          style={{
+            paddingRight: isMobile ? "0" : "10px",
+            marginBottom: isMobile ? "10px" : "0",
+            position: "relative",
+          }}
+        >
           <div style={{ position: "relative", display: "inline-block" }}>
             <input
               onFocus={handleEntranceFocus}
@@ -282,8 +313,9 @@ const AddressLayout = () => {
               maxLength={2}
               id="entranceInput"
               style={{
-                width: "171px",
-                height: "32px",
+                width: isMobile ? "200px" : "171px",
+                height: isMobile ? "40px" : "32px",
+                fontSize: isMobile ? "16px" : "14px",
                 borderRadius: "53px",
                 paddingLeft: "10px",
                 paddingRight: "35px",
