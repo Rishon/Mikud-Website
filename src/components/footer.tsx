@@ -49,8 +49,6 @@ const Footer = () => {
           }}
         >
           <code>
-            Web Designer: Delth
-            <br /> <br />
             Special Thanks:
             <br /> ▪ {""}
             <Link
