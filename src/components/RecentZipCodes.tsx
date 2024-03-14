@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 
 // Toast
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 // Icons
-import { MdOutlineContentCopy } from "react-icons/md";
+import { MdOutlineContentCopy, MdDelete } from "react-icons/md";
 
 const AddressLayout = () => {
   const [cacheData, setCacheData] = useState<
@@ -29,6 +29,15 @@ const AddressLayout = () => {
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
     toast.success("!המיקוד הועתק בהצלחה");
+  }
+
+  async function deleteFromCache(element: any) {
+    let zipCode = cacheData[element].zipCode;
+    if (zipCode === "") return;
+    let newCacheData = cacheData.filter((item, index) => index !== element);
+    setCacheData(newCacheData);
+    localStorage.setItem("mikudData", JSON.stringify(newCacheData));
+    toast.success("!המיקוד הוסר בהצלחה");
   }
 
   return (
@@ -103,14 +112,28 @@ const AddressLayout = () => {
                     alignItems: "center",
                   }}
                 >
-                  <MdOutlineContentCopy
-                    onClick={() => {
-                      copyToKeyboard(index);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  />
-                  {item.city}, {item.streetAddress}, {item.entranceNumber}
-                  {item.houseNumber} {"(" + item.zipCode + ")"} ▪
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <MdOutlineContentCopy
+                      onClick={async () => {
+                        copyToKeyboard(index);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </div>
+                  <div style={{ marginLeft: "auto", marginRight: "5px" }}>
+                    <span>
+                      {item.city}, {item.streetAddress}, {item.entranceNumber}
+                      {item.houseNumber} {"(" + item.zipCode + ")"}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <MdDelete
+                      onClick={async () => {
+                        deleteFromCache(index);
+                      }}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </div>
                 </li>
               )
             )}

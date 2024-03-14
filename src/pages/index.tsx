@@ -19,9 +19,8 @@ export default function Home() {
 
   useEffect(() => {
     const storedJsonData = localStorage.getItem("mikudData");
-    if (storedJsonData) {
-      setCacheData(JSON.parse(storedJsonData));
-    }
+    if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
+
     loadDataStore(null);
     setLoading(false);
   }, []);
@@ -34,7 +33,12 @@ export default function Home() {
 
   async function submitForm() {
     setLoading(true);
+
+    const storedJsonData = localStorage.getItem("mikudData");
+    if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
+
     setZipCode("");
+
     const city = (document.getElementById("cityInput") as HTMLInputElement)
       .value;
     const streetAddress = (
