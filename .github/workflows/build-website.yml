@@ -29,6 +29,6 @@ jobs:
               git pull origin
             fi
 
-            yarn install
-            yarn build
+            bun install
+            bun run build
             pm2 restart service-mikud --update-env

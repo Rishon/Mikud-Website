@@ -9,7 +9,6 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
     <>
       <Head>
         <title>👋 Mikud </title>
-        <link rel="icon" href="/logo.ico" />
         <meta
           name="description"
           content="Find your local Israeli zip code fast and easy."
