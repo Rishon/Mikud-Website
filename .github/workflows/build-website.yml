@@ -22,7 +22,7 @@ jobs:
             cd /home
 
             if [ ! -d "Mikud" ]; then
-            gh repo clone SelaDevelopment/Mikud Mikud
+            gh repo clone Rishon/Mikud-Wbsite Mikud
               cd Mikud
             else
               cd Mikud
