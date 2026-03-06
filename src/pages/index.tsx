@@ -146,7 +146,7 @@ export default function Home() {
             <AddressInput />
 
             {/* Buttons */}
-            <div className="flex flex-row-reverse flex-wrap gap-2.5 mt-6 font-ibm-regular">
+            <div className="flex flex-row-reverse flex-wrap gap-2.5 mt-6 font-ibm-regular justify-center md:justify-end w-full max-w-[720px] px-4 md:px-0">
               <button
                 onClick={copyToKeyboard}
                 className="h-8 rounded-lg bg-mikud-navy-glass text-right px-2.5 text-mikud-navy text-base font-ibm-regular cursor-pointer"
