@@ -19,10 +19,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /home
+            cd /opt
 
             if [ ! -d "Mikud" ]; then
-            gh repo clone Rishon/Mikud-Wbsite Mikud
+            gh repo clone Rishon/Mikud-Website Mikud
               cd Mikud
             else
               cd Mikud
@@ -31,4 +31,9 @@ jobs:
 
             bun install
             bun run build
-            pm2 restart service-mikud --update-env
+
+            if ! pm2 list | grep -q "service-mikud"; then
+              pm2 start npm --name "service-mikud" -- start
+            else
+               pm2 restart service-mikud
+            fi

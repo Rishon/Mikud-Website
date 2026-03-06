@@ -1,17 +1,13 @@
 import { useEffect, useState } from "react";
-import { useMediaQuery } from "react-responsive";
 
 // Components
-import { loadDataStore, getZipCode } from "../components/PostOfficeAPI";
-import Layout from "../components/layout";
+import { getZipCode } from "../components/PostOfficeAPI";
+import Layout from "../components/Layout";
 import AddressInput from "../components/AddressInput";
 import RecentZipCodes from "../components/RecentZipCodes";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Home() {
-  // IsMobile
-  const isMobile = useMediaQuery({ query: "(max-width: 767px)" });
-
   // Local Storage
   const [cacheData, setCacheData] = useState([]);
 
@@ -25,14 +21,13 @@ export default function Home() {
     const storedJsonData = localStorage.getItem("mikudData");
     if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
 
-    loadDataStore(null);
     setLoading(false);
   }, []);
 
   async function copyToKeyboard() {
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
-    toast.success("!המיקוד הועתק בהצלחה");
+    toast.success("המיקוד הועתק בהצלחה!");
   }
 
   async function submitForm() {
@@ -54,23 +49,34 @@ export default function Home() {
     const entranceNumber = (
       document.getElementById("entranceInput") as HTMLInputElement
     ).value;
+    const cityId = (document.getElementById("cityIdInput") as HTMLInputElement)
+      .value;
+    const streetId = (
+      document.getElementById("streetIdInput") as HTMLInputElement
+    ).value;
 
-    if (city === "" || streetAddress === "" || houseNumber === "") {
-      toast.error(".אנא מלאו את כל השדות");
+    if (
+      city === "" ||
+      streetAddress === "" ||
+      houseNumber === "" ||
+      cityId === "" ||
+      streetId === ""
+    ) {
+      toast.error("אנא מלאו את כל השדות ובחרו מהרשימה.");
       setLoading(false);
       return;
     }
 
     try {
       const zipCode = await getZipCode(
-        city,
-        streetAddress,
+        cityId,
+        streetId,
         houseNumber,
-        entranceNumber
+        entranceNumber,
       );
 
       if (!zipCode.success || zipCode.result == undefined) {
-        toast.error(".לא נמצא מיקוד, אנא נסו שנית");
+        toast.error("לא נמצא מיקוד, אנא נסו שנית.");
         return;
       }
 
@@ -87,11 +93,10 @@ export default function Home() {
       let slicedCache: any[] = cacheData;
 
       if (cacheData.length >= 5) {
-        while (cacheData.length > 5) cacheData.pop(); // In case of more than 5 items
-        slicedCache = cacheData.slice(1, 5); // Remove the first item
+        while (cacheData.length > 5) cacheData.pop();
+        slicedCache = cacheData.slice(1, 5);
       }
 
-      // If the item is already in the cache, return
       if (cacheData.length > 0) {
         for (let i = 0; i < cacheData.length; i++) {
           if (
@@ -114,7 +119,7 @@ export default function Home() {
       localStorage.setItem("mikudData", JSON.stringify(updatedCacheData));
       setCacheData(updatedCacheData as any);
     } catch (error) {
-      toast.error(".התרחש שגיאה במהלך הבקשה, אנא נסו שנית");
+      toast.error("התרחשה שגיאה במהלך הבקשה, אנא נסו שנית.");
     } finally {
       setLoading(false);
     }
@@ -122,102 +127,49 @@ export default function Home() {
 
   return (
     <Layout>
-      <main className="md:flex md:justify-between md:items-center">
-        {/* Main Content */}
-        <div
-          style={{
-            width: "708px",
-            height: "274px",
-            position: "absolute",
-            top: "30%",
-            right: "30%",
-            transform: "translate(50%, -50%)",
-          }}
-        >
-          {/* Text title */}
-          <div
-            style={{
-              color: "#101057",
-              position: "absolute",
-              top: "5%",
-              right: isMobile ? "37%" : "0%",
-              transform: "translateY(-50%)",
-              textAlign: "center",
-              fontSize: "64px",
-              fontFamily: "IBMPlexSans-Bold",
-            }}
-          >
-            {"איתור מיקוד"}
+      <Toaster />
+      <main className="flex-1 flex flex-col">
+        <div className="flex flex-col md:flex-row flex-1">
+          {/* Form Section */}
+          <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+            {/* Title */}
+            <h1 className="text-mikud-navy text-5xl md:text-6xl font-ibm-bold text-center mb-4">
+              {"איתור מיקוד"}
+            </h1>
+
+            {/* Description */}
+            <p className="text-mikud-navy text-xl md:text-2xl font-ibm-regular text-center mb-8">
+              {"הזינו כתובת בכדי לקבל מיקוד"}
+            </p>
+
+            {/* Address Input */}
+            <AddressInput />
+
+            {/* Buttons */}
+            <div className="flex flex-row-reverse flex-wrap gap-2.5 mt-6 font-ibm-regular">
+              <button
+                onClick={copyToKeyboard}
+                className="h-8 rounded-lg bg-mikud-navy-glass text-right px-2.5 text-mikud-navy text-base font-ibm-regular cursor-pointer"
+              >
+                {zipCode === "" ? "המיקוד יופיע כאן" : `המיקוד הוא: ${zipCode}`}
+              </button>
+              <button
+                className={`w-32 h-8 rounded-lg bg-mikud-purple text-white text-base cursor-pointer transition-opacity ${
+                  loading ? "opacity-50" : "opacity-100"
+                }`}
+                onClick={submitForm}
+                disabled={loading}
+              >
+                {"חפש מיקוד"}
+              </button>
+            </div>
           </div>
 
-          {/* Description */}
-          <div
-            style={{
-              color: "#101057",
-              position: "absolute",
-              top: "25%",
-              right: isMobile ? "58%" : "20.4%",
-              transform: "translate(50%, -50%)",
-              textAlign: "center",
-              fontSize: "24px",
-              fontFamily: "IBMPlexSans-Regular",
-            }}
-          >
-            {".הזינו כתובת בכדי לקבל מיקוד"}
-          </div>
-
-          {/* Address Input */}
-          <AddressInput />
-
-          <div
-            style={{
-              right: isMobile ? "35%" : "0%",
-              top: isMobile ? "130%" : "70%",
-              position: "absolute",
-              fontFamily: "IBMPlexSans-Regular",
-              display: "flex",
-              flexDirection: "row-reverse",
-              gap: "10px",
-            }}
-          >
-            <button
-              style={{
-                width: "128px",
-                height: "32px",
-                borderRadius: "8px",
-                backgroundColor: "#3300EE",
-                color: "#fff",
-                fontSize: "16px",
-                opacity: loading ? 0.5 : 1,
-                transition: "background-color 0.3s",
-                cursor: "pointer",
-              }}
-              onClick={submitForm}
-              disabled={loading}
-            >
-              {"חפש מיקוד"}
-            </button>
-
-            <button
-              onClick={copyToKeyboard}
-              style={{
-                width: isMobile ? "220px" : "240px",
-                height: "32px",
-                borderRadius: "8px",
-                backgroundColor: "#10105726",
-                textAlign: "right",
-                padding: "0 10px",
-                color: "#101057",
-                fontSize: "16px",
-                fontFamily: "IBMPlexSans-Regular",
-              }}
-            >
-              {zipCode + " :המיקוד שלך הוא"}
-            </button>
-          </div>
+          {/* Recent Zip Codes */}
+          <RecentZipCodes />
         </div>
-        <RecentZipCodes />
-        <Toaster />
+
+        <div className="h-16 bg-mikud-purple w-full" />
       </main>
     </Layout>
   );

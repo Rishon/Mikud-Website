@@ -15,17 +15,27 @@ These instructions will help you set up the project on your local machine for de
 
 1. Clone the repository:
 
-    ```sh
-    git clone https://github.com/Rishon/Mikud-Website
-    cd Mikud-Website
-    ```
+   ```sh
+   git clone https://github.com/Rishon/Mikud-Website
+   cd Mikud-Website
+   ```
 
 2. Install the dependencies:
 
-    ``npm install`` / ``yarn install`` / ``bun install``
+   `npm install` / `yarn install` / `bun install`
 
-### Running the Development Server
+3. Build project:
 
-To start the development server, run:
+   `npm run build` / `yarn run build` / `bun run build`
 
-``npm run dev`` / ``yarn run dev`` / ``bun run dev``
+### Running the Production client
+
+To start the production client, run:
+
+`npm run start` / `yarn run start` / `bun run start`
+
+### Running the Development client
+
+To start the development client, run:
+
+`npm run dev` / `yarn run dev` / `bun run dev`

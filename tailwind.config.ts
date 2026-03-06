@@ -8,10 +8,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      colors: {
+        "mikud-navy": "#101057",
+        "mikud-purple": "#3300EE",
+        "mikud-footer": "#05071a",
+        "mikud-bg": "#f2fcfd",
+        "mikud-navy-glass": "rgba(16,16,87,0.15)",
+      },
+      fontFamily: {
+        "ibm-bold": ["IBMPlexSans-Bold", "sans-serif"],
+        "ibm-regular": ["IBMPlexSans-Regular", "sans-serif"],
       },
     },
   },
