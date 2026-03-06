@@ -11,7 +11,7 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         <title>מיקוד | חיפוש מיקוד בישראל</title>
         <meta
           name="description"
-          content="כלי חינמי לחיפוש מיקוד בישראל לפי כתובת. הזינו עיר, רחוב ומספר בית וקבלו מיקוד מיידית. Free Israeli zip code lookup by address."
+          content="חיפוש מיקוד בישראל לפי כתובת. הזינו עיר, רחוב ומספר בית וקבלו מיקוד מיידית. Israeli zip code lookup by address."
         />
         <meta
           name="keywords"
@@ -26,7 +26,7 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         <meta property="og:title" content="מיקוד | חיפוש מיקוד בישראל" />
         <meta
           property="og:description"
-          content="כלי חינמי לחיפוש מיקוד בישראל לפי כתובת. הזינו עיר, רחוב ומספר בית וקבלו מיקוד מיידית."
+          content="חיפוש מיקוד בישראל לפי כתובת. הזינו עיר, רחוב ומספר בית וקבלו מיקוד מיידית."
         />
         <meta property="og:locale" content="he_IL" />
         <meta property="og:locale:alternate" content="en_US" />
@@ -35,7 +35,7 @@ const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => {
         <meta name="twitter:title" content="מיקוד | חיפוש מיקוד בישראל" />
         <meta
           name="twitter:description"
-          content="כלי חינמי לחיפוש מיקוד בישראל לפי כתובת."
+          content="חיפוש מיקוד בישראל לפי כתובת."
         />
       </Head>
       <div
