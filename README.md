@@ -39,3 +39,9 @@ To start the production client, run:
 To start the development client, run:
 
 `npm run dev` / `yarn run dev` / `bun run dev`
+
+## Data
+
+Cities and streets are searched from an in-memory index built from Israel's open data portal (data.gov.il). Refresh the data with:
+
+`bun run data:update`
