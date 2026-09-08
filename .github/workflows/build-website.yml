@@ -58,7 +58,7 @@ jobs:
         run: bun run build
         env:
           NEXT_PUBLIC_SITE_URL: ${{ env.SITE_URL }}
-          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
 
   deploy:
     name: Deploy
@@ -66,7 +66,7 @@ jobs:
     needs: build
     timeout-minutes: 15
     env:
-      TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+      TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
       TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
 
     steps:
