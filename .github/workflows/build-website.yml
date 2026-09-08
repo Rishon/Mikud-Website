@@ -80,22 +80,25 @@ jobs:
           envs: SITE_URL,TURNSTILE_SITE_KEY,TURNSTILE_SECRET_KEY
           script: |
             set -e
-            export NEXT_PUBLIC_SITE_URL="$SITE_URL"
-            export NEXT_PUBLIC_TURNSTILE_SITE_KEY="$TURNSTILE_SITE_KEY"
-            export TURNSTILE_SECRET_KEY
 
             if [ ! -d /opt/Mikud ]; then
               gh repo clone Rishon/Mikud-Website /opt/Mikud
             fi
 
             cd /opt/Mikud
-            git pull --ff-only origin master
+            git fetch --prune origin master
+            git reset --hard origin/master
+
+            umask 077
+            printf 'NEXT_PUBLIC_SITE_URL=%s\nNEXT_PUBLIC_TURNSTILE_SITE_KEY=%s\nTURNSTILE_SECRET_KEY=%s\n' \
+              "$SITE_URL" "$TURNSTILE_SITE_KEY" "$TURNSTILE_SECRET_KEY" > .env.production
+            umask 022
 
             bun install --frozen-lockfile
             bun run build
 
             if pm2 describe service-mikud >/dev/null 2>&1; then
-              pm2 restart service-mikud --update-env
+              pm2 restart service-mikud
             else
               PORT=5001 pm2 start bun --name service-mikud -- run start
             fi
