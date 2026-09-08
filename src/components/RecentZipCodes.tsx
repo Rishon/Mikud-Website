@@ -1,79 +1,72 @@
-import React, { useEffect, useState } from "react";
-
-// Toast
 import toast from "react-hot-toast";
 
 // Icons
-import { MdOutlineContentCopy, MdDelete } from "react-icons/md";
+import { CopyIcon, DeleteIcon } from "@/components/Icons";
+import { removeRecentZipCode, useRecentZipCodes } from "@/lib/zipHistory";
+import { useT } from "@/i18n";
 
-const AddressLayout = () => {
-  const [cacheData, setCacheData] = useState<
-    {
-      city: string;
-      streetAddress: string;
-      houseNumber: string;
-      entranceNumber: string;
-      zipCode: string;
-    }[]
-  >([]);
+const RecentZipCodes = () => {
+  const { t } = useT();
+  const recent = useRecentZipCodes();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const storedJsonData = localStorage.getItem("mikudData");
-      if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  async function copyToKeyboard(element: number) {
-    const zipCode = cacheData[element].zipCode;
+  async function copyToKeyboard(zipCode: string) {
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
-    toast.success("המיקוד הועתק בהצלחה!");
+    toast.success(t.toastCopied);
   }
 
-  async function deleteFromCache(element: number) {
-    const zipCode = cacheData[element].zipCode;
-    if (zipCode === "") return;
-    const newCacheData = cacheData.filter((_, index) => index !== element);
-    setCacheData(newCacheData);
-    localStorage.setItem("mikudData", JSON.stringify(newCacheData));
-    toast.success("המיקוד הוסר בהצלחה!");
+  function deleteFromCache(index: number) {
+    removeRecentZipCode(index);
+    toast.success(t.toastRemoved);
   }
 
   return (
     <aside className="md:w-[450px] bg-transparent md:bg-mikud-footer flex items-start justify-center px-4 py-8 md:items-center">
       <div className="bg-white w-full md:w-[90%] rounded-lg border border-mikud-navy p-6 max-h-[60vh] overflow-y-auto">
         {/* Title */}
-        <div className="text-mikud-navy text-2xl font-ibm-bold text-right mb-4">
-          {"מיקודים אחרונים"}
-        </div>
+        <h2 className="text-mikud-navy text-2xl font-ibm-bold text-start mb-4">
+          {t.recentTitle}
+        </h2>
         {/* Separator line */}
         <hr className="border-mikud-navy mb-4" />
         {/* List */}
-        <ul className="text-mikud-navy text-base font-ibm-regular text-right list-none space-y-2.5">
-          {cacheData.slice(0, 5).map((item, index) =>
-            item.city === "" ? null : (
+        {recent.length === 0 ? (
+          <p className="text-mikud-navy/60 text-base font-ibm-regular text-start">
+            {t.recentEmpty}
+          </p>
+        ) : (
+          <ul className="text-mikud-navy text-base font-ibm-regular text-start list-none space-y-2.5">
+            {recent.map((item, index) => (
               <li key={index} className="flex items-center justify-between">
-                <MdOutlineContentCopy
+                <button
+                  type="button"
+                  aria-label={t.copy}
+                  title={t.copy}
                   className="cursor-pointer shrink-0"
-                  onClick={() => copyToKeyboard(index)}
-                />
-                <span className="mx-2 text-right flex-1">
-                  {item.city}, {item.streetAddress}, {item.entranceNumber}
-                  {item.houseNumber} {"(" + item.zipCode + ")"}
+                  onClick={() => copyToKeyboard(item.zipCode)}
+                >
+                  <CopyIcon />
+                </button>
+                <span className="mx-2 text-start flex-1">
+                  {item.city}, {item.streetAddress} {item.houseNumber}
+                  {item.entranceNumber} ({item.zipCode})
                 </span>
-                <MdDelete
+                <button
+                  type="button"
+                  aria-label={t.remove}
+                  title={t.remove}
                   className="cursor-pointer shrink-0"
                   onClick={() => deleteFromCache(index)}
-                />
+                >
+                  <DeleteIcon />
+                </button>
               </li>
-            ),
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
       </div>
     </aside>
   );
 };
 
-export default AddressLayout;
+export default RecentZipCodes;

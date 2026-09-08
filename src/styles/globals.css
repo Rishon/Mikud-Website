@@ -21,11 +21,13 @@ body {
 @font-face {
   font-family: "IBMPlexSans-Bold";
   src: url("/fonts/IBMPlexSansHebrew-Bold.ttf");
+  font-display: swap;
 }
 
 @font-face {
   font-family: "IBMPlexSans-Regular";
   src: url("/fonts/IBMPlexSansHebrew-Regular.ttf");
+  font-display: swap;
 }
 
 @media only screen and (max-width: 600px) {

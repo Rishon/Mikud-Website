@@ -4,21 +4,27 @@ import React, { useRef, useState } from "react";
 import {
   getCitySearchResults,
   getStreetSearchResults,
-} from "../components/PostOfficeAPI";
+} from "@/services/zipApi";
 
 // Icons
-import { IoLocationSharp } from "react-icons/io5";
-import { BsFillSignpost2Fill } from "react-icons/bs";
-import { FaHouse } from "react-icons/fa6";
-import { FaLocationArrow } from "react-icons/fa";
+import {
+  HouseIcon,
+  LocationArrowIcon,
+  LocationIcon,
+  SignpostIcon,
+} from "@/components/Icons";
+import { useT } from "@/i18n";
 
 const inputCls =
-  "w-full md:w-[171px] h-10 md:h-8 text-base md:text-sm rounded-full pl-2.5 pr-9 text-right border border-mikud-navy focus:outline-none focus:ring-2 focus:ring-mikud-purple bg-white";
+  "w-full md:w-[171px] h-10 md:h-8 text-base md:text-sm rounded-full ps-9 pe-2.5 text-start border border-mikud-navy focus:outline-none focus:ring-2 focus:ring-mikud-purple bg-white";
 
 const dropdownCls =
   "absolute top-full mt-1 bg-white p-1.5 w-full rounded-xl border border-mikud-navy z-10 shadow-md";
 
-const AddressLayout = () => {
+const AddressInput = () => {
+  const { t, locale } = useT();
+  const label = (item: any) => (locale === "en" && item.en ? item.en : item.n);
+
   // Selected city/street IDs for the zip lookup
   const [cityId, setCityId] = useState("");
   const [streetId, setStreetId] = useState("");
@@ -66,7 +72,9 @@ const AddressLayout = () => {
         <input
           onBlur={handleCityBlur}
           type="text"
-          placeholder="ישוב / עיר"
+          autoComplete="off"
+          placeholder={t.cityPlaceholder}
+          aria-label={t.cityPlaceholder}
           maxLength={40}
           id="cityInput"
           className={inputCls}
@@ -84,7 +92,7 @@ const AddressLayout = () => {
               const results = await getCitySearchResults(val);
               setCityResults(results);
               setShowCityDatalist(true);
-            }, 300);
+            }, 200);
           }}
         />
         {showCityDatalist && cityResults.length > 0 && (
@@ -92,13 +100,13 @@ const AddressLayout = () => {
             {cityResults.slice(0, 5).map((city: any, index) => (
               <div
                 key={index}
-                className="p-1.5 cursor-pointer hover:bg-gray-100 text-right text-mikud-navy rounded"
+                className="p-1.5 cursor-pointer hover:bg-gray-100 text-start text-mikud-navy rounded"
                 onMouseDown={() => {
                   setCityId(city.id);
                   setStreetId("");
                   (
                     document.getElementById("cityInput") as HTMLInputElement
-                  ).value = city.n;
+                  ).value = label(city);
                   // Clear street input when city changes
                   (
                     document.getElementById("streetInput") as HTMLInputElement
@@ -107,14 +115,14 @@ const AddressLayout = () => {
                   setCityResults([]);
                 }}
               >
-                {city.n}
+                {label(city)}
               </div>
             ))}
           </div>
         )}
         {/* Icon */}
-        <div className="absolute top-1/2 right-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
-          <IoLocationSharp />
+        <div className="absolute top-1/2 start-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
+          <LocationIcon />
         </div>
       </div>
 
@@ -123,7 +131,9 @@ const AddressLayout = () => {
         <input
           onBlur={handleStreetBlur}
           type="text"
-          placeholder="רחוב"
+          autoComplete="off"
+          placeholder={t.streetPlaceholder}
+          aria-label={t.streetPlaceholder}
           maxLength={40}
           id="streetInput"
           className={inputCls}
@@ -140,7 +150,7 @@ const AddressLayout = () => {
               const results = await getStreetSearchResults(cityId, val);
               setStreetResults(results);
               setShowStreetDatalist(true);
-            }, 300);
+            }, 200);
           }}
         />
         {showStreetDatalist && streetResults.length > 0 && (
@@ -148,24 +158,24 @@ const AddressLayout = () => {
             {streetResults.slice(0, 5).map((street: any, index) => (
               <div
                 key={index}
-                className="p-1.5 cursor-pointer hover:bg-gray-100 text-right text-mikud-navy rounded"
+                className="p-1.5 cursor-pointer hover:bg-gray-100 text-start text-mikud-navy rounded"
                 onMouseDown={() => {
                   setStreetId(street.id);
                   (
                     document.getElementById("streetInput") as HTMLInputElement
-                  ).value = street.n;
+                  ).value = label(street);
                   setShowStreetDatalist(false);
                   setStreetResults([]);
                 }}
               >
-                {street.n}
+                {label(street)}
               </div>
             ))}
           </div>
         )}
         {/* Icon */}
-        <div className="absolute top-1/2 right-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
-          <FaHouse />
+        <div className="absolute top-1/2 start-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
+          <HouseIcon />
         </div>
       </div>
 
@@ -173,14 +183,16 @@ const AddressLayout = () => {
       <div className="relative w-full md:w-auto">
         <input
           type="text"
-          placeholder="מס' בית"
+          autoComplete="off"
+          placeholder={t.housePlaceholder}
+          aria-label={t.housePlaceholder}
           maxLength={2}
           id="houseNumberInput"
           className={inputCls}
         />
         {/* Icon */}
-        <div className="absolute top-1/2 right-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
-          <BsFillSignpost2Fill />
+        <div className="absolute top-1/2 start-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
+          <SignpostIcon />
         </div>
       </div>
 
@@ -190,7 +202,9 @@ const AddressLayout = () => {
           onFocus={handleEntranceFocus}
           onBlur={handleEntranceBlur}
           type="text"
-          placeholder="כניסה (אם יש)"
+          autoComplete="off"
+          placeholder={t.entrancePlaceholder}
+          aria-label={t.entrancePlaceholder}
           maxLength={2}
           id="entranceInput"
           className={inputCls}
@@ -200,7 +214,7 @@ const AddressLayout = () => {
             {entranceResults.slice(0, 5).map((entrance, index) => (
               <div
                 key={index}
-                className="p-1.5 cursor-pointer hover:bg-gray-100 text-right text-mikud-navy rounded"
+                className="p-1.5 cursor-pointer hover:bg-gray-100 text-start text-mikud-navy rounded"
                 onMouseDown={() => {
                   (
                     document.getElementById("entranceInput") as HTMLInputElement
@@ -214,12 +228,12 @@ const AddressLayout = () => {
           </div>
         )}
         {/* Icon */}
-        <div className="absolute top-1/2 right-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
-          <FaLocationArrow />
+        <div className="absolute top-1/2 start-2.5 -translate-y-1/2 pointer-events-none text-mikud-navy">
+          <LocationArrowIcon />
         </div>
       </div>
     </div>
   );
 };
 
-export default AddressLayout;
+export default AddressInput;

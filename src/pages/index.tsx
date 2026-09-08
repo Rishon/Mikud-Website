@@ -1,15 +1,20 @@
-import { useEffect, useState } from "react";
-
-// Components
-import { getZipCode } from "../components/PostOfficeAPI";
-import Layout from "../components/Layout";
-import AddressInput from "../components/AddressInput";
-import RecentZipCodes from "../components/RecentZipCodes";
+import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
+// Components
+import { getZipCode } from "@/services/zipApi";
+import Layout from "@/components/Layout";
+import AddressInput from "@/components/AddressInput";
+import RecentZipCodes from "@/components/RecentZipCodes";
+import { saveRecentZipCode } from "@/lib/zipHistory";
+import { getTurnstileToken } from "@/lib/turnstile";
+import { useT } from "@/i18n";
+
+const inputValue = (id: string) =>
+  (document.getElementById(id) as HTMLInputElement | null)?.value ?? "";
+
 export default function Home() {
-  // Local Storage
-  const [cacheData, setCacheData] = useState([]);
+  const { t } = useT();
 
   // Loading
   const [loading, setLoading] = useState(false);
@@ -17,109 +22,56 @@ export default function Home() {
   // Result
   const [zipCode, setZipCode] = useState("");
 
-  useEffect(() => {
-    const storedJsonData = localStorage.getItem("mikudData");
-    if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
-
-    setLoading(false);
-  }, []);
-
   async function copyToKeyboard() {
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
-    toast.success("המיקוד הועתק בהצלחה!");
+    toast.success(t.toastCopied);
   }
 
   async function submitForm() {
     setLoading(true);
-
-    const storedJsonData = localStorage.getItem("mikudData");
-    if (storedJsonData) setCacheData(JSON.parse(storedJsonData));
-
     setZipCode("");
 
-    const city = (document.getElementById("cityInput") as HTMLInputElement)
-      .value;
-    const streetAddress = (
-      document.getElementById("streetInput") as HTMLInputElement
-    ).value;
-    const houseNumber = (
-      document.getElementById("houseNumberInput") as HTMLInputElement
-    ).value;
-    const entranceNumber = (
-      document.getElementById("entranceInput") as HTMLInputElement
-    ).value;
-    const cityId = (document.getElementById("cityIdInput") as HTMLInputElement)
-      .value;
-    const streetId = (
-      document.getElementById("streetIdInput") as HTMLInputElement
-    ).value;
+    const city = inputValue("cityInput");
+    const streetAddress = inputValue("streetInput");
+    const houseNumber = inputValue("houseNumberInput");
+    const entranceNumber = inputValue("entranceInput");
+    const cityId = inputValue("cityIdInput");
+    const streetId = inputValue("streetIdInput");
 
-    if (
-      city === "" ||
-      streetAddress === "" ||
-      houseNumber === "" ||
-      cityId === "" ||
-      streetId === ""
-    ) {
-      toast.error("אנא מלאו את כל השדות ובחרו מהרשימה.");
+    if (!city || !streetAddress || !houseNumber || !cityId || !streetId) {
+      toast.error(t.toastMissingFields);
       setLoading(false);
       return;
     }
 
     try {
-      const zipCode = await getZipCode(
+      const result = await getZipCode(
         cityId,
         streetId,
         houseNumber,
         entranceNumber,
+        await getTurnstileToken(),
       );
 
-      if (!zipCode.success || zipCode.result == undefined) {
-        toast.error("לא נמצא מיקוד, אנא נסו שנית.");
+      if (!result.success || result.result == undefined) {
+        if (result.error === "rate_limited") toast.error(t.toastRateLimited);
+        else if (result.error) toast.error(t.toastError);
+        else toast.error(t.toastNotFound);
         return;
       }
 
-      setZipCode(zipCode.result.zip);
-
-      let json: any = {
-        city: city,
-        streetAddress: streetAddress,
-        houseNumber: houseNumber,
-        entranceNumber: entranceNumber,
-        zipCode: zipCode.result.zip,
-      };
-
-      let slicedCache: any[] = cacheData;
-
-      if (cacheData.length >= 5) {
-        while (cacheData.length > 5) cacheData.pop();
-        slicedCache = cacheData.slice(1, 5);
-      }
-
-      if (cacheData.length > 0) {
-        for (let i = 0; i < cacheData.length; i++) {
-          if (
-            JSON.stringify(cacheData[i]) ===
-            JSON.stringify({
-              city: city,
-              streetAddress: streetAddress,
-              houseNumber: houseNumber,
-              entranceNumber: entranceNumber,
-              zipCode: zipCode.result.zip,
-            })
-          ) {
-            return;
-          }
-        }
-      }
-
-      const updatedCacheData = [...slicedCache, json];
-
-      localStorage.setItem("mikudData", JSON.stringify(updatedCacheData));
-      setCacheData(updatedCacheData as any);
-    } catch (error) {
-      toast.error("התרחשה שגיאה במהלך הבקשה, אנא נסו שנית.");
+      const zip = result.result.zip;
+      setZipCode(zip);
+      saveRecentZipCode({
+        city,
+        streetAddress,
+        houseNumber,
+        entranceNumber,
+        zipCode: zip,
+      });
+    } catch {
+      toast.error(t.toastError);
     } finally {
       setLoading(false);
     }
@@ -134,12 +86,12 @@ export default function Home() {
           <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
             {/* Title */}
             <h1 className="text-mikud-navy text-5xl md:text-6xl font-ibm-bold text-center mb-4">
-              {"איתור מיקוד"}
+              {t.heading}
             </h1>
 
             {/* Description */}
             <p className="text-mikud-navy text-xl md:text-2xl font-ibm-regular text-center mb-8">
-              {"הזינו כתובת בכדי לקבל מיקוד"}
+              {t.subheading}
             </p>
 
             {/* Address Input */}
@@ -149,9 +101,12 @@ export default function Home() {
             <div className="flex flex-row-reverse flex-wrap gap-2.5 mt-6 font-ibm-regular justify-center md:justify-end w-full max-w-[720px] px-4 md:px-0">
               <button
                 onClick={copyToKeyboard}
-                className="h-8 rounded-lg bg-mikud-navy-glass text-right px-2.5 text-mikud-navy text-base font-ibm-regular cursor-pointer"
+                aria-live="polite"
+                className="h-8 rounded-lg bg-mikud-navy-glass text-start px-2.5 text-mikud-navy text-base font-ibm-regular cursor-pointer"
               >
-                {zipCode === "" ? "המיקוד יופיע כאן" : `המיקוד הוא: ${zipCode}`}
+                {zipCode === ""
+                  ? t.resultPlaceholder
+                  : `${t.resultPrefix} ${zipCode}`}
               </button>
               <button
                 className={`w-32 h-8 rounded-lg bg-mikud-purple text-white text-base cursor-pointer transition-opacity ${
@@ -160,7 +115,7 @@ export default function Home() {
                 onClick={submitForm}
                 disabled={loading}
               >
-                {"חפש מיקוד"}
+                {t.search}
               </button>
             </div>
           </div>
