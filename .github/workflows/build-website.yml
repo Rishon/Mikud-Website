@@ -3,11 +3,24 @@ name: Build and Deploy
 on:
   push:
     branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SITE_URL: ${{ vars.SITE_URL || 'https://mikud.rishon.systems' }}
+  INDEXNOW_KEY: e7f1500e2ceb4c3e9af5e3dec07faa3c
 
 jobs:
   build:
-    name: Build
+    name: Lint and Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout Repository
@@ -15,27 +28,47 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Cache dependencies and Next.js build
+      - name: Cache Bun downloads
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.bun/install/cache
-            .next/cache
-          key: ${{ runner.os }}-bun-next-${{ hashFiles('bun.lockb', 'package.json') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-bun-next-
+            ${{ runner.os }}-bun-
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('bun.lock') }}-${{ hashFiles('src/**', 'public/**', 'next.config.mjs', 'tailwind.config.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('bun.lock') }}-
+            ${{ runner.os }}-next-
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
 
       - name: Build
         run: bun run build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ env.SITE_URL }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
 
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     needs: build
+    timeout-minutes: 15
+    env:
+      TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
@@ -44,21 +77,48 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+          envs: SITE_URL,TURNSTILE_SITE_KEY,TURNSTILE_SECRET_KEY
           script: |
             set -e
+            export NEXT_PUBLIC_SITE_URL="$SITE_URL"
+            export NEXT_PUBLIC_TURNSTILE_SITE_KEY="$TURNSTILE_SITE_KEY"
+            export TURNSTILE_SECRET_KEY
 
-            if [ ! -d "/opt/Mikud" ]; then
+            if [ ! -d /opt/Mikud ]; then
               gh repo clone Rishon/Mikud-Website /opt/Mikud
             fi
 
             cd /opt/Mikud
-            git pull origin master
+            git pull --ff-only origin master
 
-            bun install
+            bun install --frozen-lockfile
             bun run build
 
-            if pm2 list | grep -q "service-mikud"; then
-              pm2 restart service-mikud
+            if pm2 describe service-mikud >/dev/null 2>&1; then
+              pm2 restart service-mikud --update-env
             else
-              PORT=5001 pm2 start bun --name "service-mikud" -- run start
+              PORT=5001 pm2 start bun --name service-mikud -- run start
             fi
+            pm2 save
+
+  indexnow:
+    name: Notify Search Engines
+    runs-on: ubuntu-latest
+    needs: deploy
+    timeout-minutes: 5
+
+    steps:
+      - name: Wait for the site to serve the IndexNow key
+        run: |
+          curl -fsS --retry 12 --retry-delay 5 --retry-all-errors "$SITE_URL/$INDEXNOW_KEY.txt" | grep -qx "$INDEXNOW_KEY"
+
+      - name: Submit URLs to IndexNow
+        run: |
+          host="${SITE_URL#*://}"
+          host="${host%%/*}"
+          payload=$(printf '{"host":"%s","key":"%s","keyLocation":"%s/%s.txt","urlList":["%s/","%s/en","%s/sitemap.xml"]}' \
+            "$host" "$INDEXNOW_KEY" "$SITE_URL" "$INDEXNOW_KEY" "$SITE_URL" "$SITE_URL" "$SITE_URL")
+          curl -fsS -X POST "https://api.indexnow.org/IndexNow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data "$payload" \
+            -w "IndexNow responded with HTTP %{http_code}\n"
