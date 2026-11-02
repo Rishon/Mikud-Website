@@ -7,5 +7,5 @@ export const SITE_URL = (
 export function localizedUrl(locale: Locale, path = "/") {
   const prefix = locale === "he" ? "" : `/${locale}`;
   const suffix = path === "/" ? "" : path;
-  return `${SITE_URL}${prefix}${suffix}` || `${SITE_URL}/`;
+  return prefix || suffix ? `${SITE_URL}${prefix}${suffix}` : `${SITE_URL}/`;
 }

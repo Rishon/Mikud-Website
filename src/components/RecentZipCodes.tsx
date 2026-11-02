@@ -2,6 +2,7 @@ import toast from "react-hot-toast";
 
 // Icons
 import { CopyIcon, DeleteIcon } from "@/components/Icons";
+import { trackEvent } from "@/lib/analytics";
 import { removeRecentZipCode, useRecentZipCodes } from "@/lib/zipHistory";
 import { useT } from "@/i18n";
 
@@ -13,6 +14,7 @@ const RecentZipCodes = () => {
     if (zipCode === "") return;
     await navigator.clipboard.writeText(zipCode);
     toast.success(t.toastCopied);
+    trackEvent("zip_copy", { source: "recent" });
   }
 
   function deleteFromCache(index: number) {
@@ -35,7 +37,10 @@ const RecentZipCodes = () => {
             {t.recentEmpty}
           </p>
         ) : (
-          <ul className="text-mikud-navy text-base font-ibm-regular text-start list-none space-y-2.5">
+          <ul
+            data-clarity-mask="True"
+            className="text-mikud-navy text-base font-ibm-regular text-start list-none space-y-2.5"
+          >
             {recent.map((item, index) => (
               <li key={index} className="flex items-center justify-between">
                 <button

@@ -111,17 +111,27 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Wait for the site to serve the IndexNow key
         run: |
           curl -fsS --retry 12 --retry-delay 5 --retry-all-errors "$SITE_URL/$INDEXNOW_KEY.txt" | grep -qx "$INDEXNOW_KEY"
 
-      - name: Submit URLs to IndexNow
+      - name: Find when the previous deploy was committed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
         run: |
-          host="${SITE_URL#*://}"
-          host="${host%%/*}"
-          payload=$(printf '{"host":"%s","key":"%s","keyLocation":"%s/%s.txt","urlList":["%s/","%s/en","%s/sitemap.xml"]}' \
-            "$host" "$INDEXNOW_KEY" "$SITE_URL" "$INDEXNOW_KEY" "$SITE_URL" "$SITE_URL" "$SITE_URL")
-          curl -fsS -X POST "https://api.indexnow.org/IndexNow" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            --data "$payload" \
-            -w "IndexNow responded with HTTP %{http_code}\n"
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            since=$(gh api "repos/${{ github.repository }}/commits/$BEFORE" --jq .commit.committer.date || true)
+            echo "SINCE=$since" >> "$GITHUB_ENV"
+          fi
+
+      - name: Submit changed URLs to IndexNow
+        run: bun scripts/indexnow.ts

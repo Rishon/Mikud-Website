@@ -1,7 +1,7 @@
 ---
 title: Privacy Policy
 description: Privacy policy for Mikud: what is processed when you look up a zip code, what stays on your device, which cookies and third-party services are used, and your rights.
-updated: September 8, 2026
+updated: November 2, 2026
 ---
 
 Mikud is a free service for finding Israeli zip codes by address. It is operated by Rishon Jaffe, trading as rishon.systems (the "operator", "we"), who is the controller of any personal information processed through the site. You can reach us at [mail@rishon.systems](mailto:mail@rishon.systems).
@@ -26,15 +26,15 @@ To keep the service available to everyone, the number of requests per IP address
 
 Your list of recent zip codes is stored only in your browser and is never sent to us. You can delete any entry with the delete icon, or clear all site data from your browser settings.
 
-The site uses one essential cookie to remember the interface language you chose; it is kept for twelve months and is not used for tracking. Your cookie decision is also stored in your browser so the banner is not shown again.
+The interface language you chose and your cookie decision are also stored only in your browser, so the site opens in your language and the banner is not shown again. Neither is sent to us or used for tracking.
 
 ## Analytics cookies
 
-With your consent in the cookie banner, the site uses two analytics services. Neither is loaded unless you accept, and you can withdraw consent at any time with the button at the bottom of this page.
+With your consent in the cookie banner, the site uses two analytics services. Neither is loaded unless you accept, and you can withdraw consent at any time with the button at the bottom of this page. Withdrawing consent stops both services and deletes the cookies they set on this site.
 
 **Google Analytics** (Google Ireland Limited / Google LLC) measures how the site is used: pages viewed, interactions, device and browser type, and approximate location derived from your IP address. Google Analytics sets first-party cookies to distinguish visitors. Google may process this data on servers outside Israel and the EU, including in the United States. Learn more in [how Google uses information from sites or apps that use its services](https://policies.google.com/technologies/partner-sites) and [Google's privacy policy](https://policies.google.com/privacy). You can also install the [Google Analytics opt-out browser add-on](https://tools.google.com/dlpage/gaoptout).
 
-**Microsoft Clarity** (Microsoft Corporation) captures how you use and interact with the site through behavioral metrics, heatmaps and session replay, which we use to improve the site. Usage data is captured using first-party and third-party cookies and similar technologies. Clarity masks the text you type into form fields by default, so the addresses you enter are not visible in recordings. Microsoft may also use this data as described in the [Microsoft Privacy Statement](https://www.microsoft.com/privacy/privacystatement); see also [Clarity's data privacy page](https://clarity.microsoft.com/privacy). We do not use Microsoft Advertising.
+**Microsoft Clarity** (Microsoft Corporation) captures how you use and interact with the site through behavioral metrics, heatmaps and session replay, which we use to improve the site. Usage data is captured using first-party and third-party cookies and similar technologies. Clarity masks the text you type into form fields, and we also mask your zip code results and your list of recent searches, so the addresses you look up are not visible in recordings. Microsoft may also use this data as described in the [Microsoft Privacy Statement](https://www.microsoft.com/privacy/privacystatement); see also [Clarity's data privacy page](https://clarity.microsoft.com/privacy). We do not use Microsoft Advertising.
 
 Google and Microsoft retain analytics data according to their own retention policies, which are described in the documents linked above.
 

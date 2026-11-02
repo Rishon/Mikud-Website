@@ -8,14 +8,31 @@ import { SITE_URL, localizedUrl } from "@/config/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export type Breadcrumb = { name: string; path: string };
+
 type LayoutProps = Readonly<{
   children: React.ReactNode;
   title?: string;
   description?: string;
   noindex?: boolean;
+  breadcrumbs?: Breadcrumb[];
 }>;
 
-const RootLayout = ({ children, title, description, noindex }: LayoutProps) => {
+const WEBSITE_ID = `${localizedUrl("he")}#website`;
+const PUBLISHER = {
+  "@type": "Organization",
+  "@id": "https://rishon.systems/#organization",
+  name: "rishon.systems",
+  url: "https://rishon.systems",
+};
+
+const RootLayout = ({
+  children,
+  title,
+  description,
+  noindex,
+  breadcrumbs,
+}: LayoutProps) => {
   const { t, locale } = useT();
   const router = useRouter();
   const path = router.asPath.split(/[?#]/)[0] || "/";
@@ -25,26 +42,30 @@ const RootLayout = ({ children, title, description, noindex }: LayoutProps) => {
   const pageTitle = title ? `${title} | ${t.siteName}` : t.title;
   const pageDescription = description ?? t.description;
   const ogImage = `${SITE_URL}/og-${locale}.png`;
+  const breadcrumbId = `${canonical}#breadcrumb`;
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": `${localizedUrl("he")}/#website`,
+        "@id": WEBSITE_ID,
         url: localizedUrl("he"),
-        name: t.siteName,
-        description: t.description,
+        name: dictionaries.he.siteName,
+        alternateName: [dictionaries.en.siteName],
         inLanguage: LOCALES,
+        publisher: { "@id": PUBLISHER["@id"] },
       },
+      PUBLISHER,
       isHome
         ? {
             "@type": "WebApplication",
             "@id": `${canonical}#app`,
             url: canonical,
-            name: t.title,
+            name: t.siteName,
             description: t.description,
             inLanguage: locale,
+            isPartOf: { "@id": WEBSITE_ID },
             applicationCategory: "UtilityApplication",
             operatingSystem: "All",
             browserRequirements: "Requires JavaScript",
@@ -59,8 +80,23 @@ const RootLayout = ({ children, title, description, noindex }: LayoutProps) => {
             name: pageTitle,
             description: pageDescription,
             inLanguage: locale,
-            isPartOf: { "@id": `${localizedUrl("he")}/#website` },
+            isPartOf: { "@id": WEBSITE_ID },
+            ...(breadcrumbs && { breadcrumb: { "@id": breadcrumbId } }),
           },
+      ...(breadcrumbs
+        ? [
+            {
+              "@type": "BreadcrumbList",
+              "@id": breadcrumbId,
+              itemListElement: breadcrumbs.map((crumb, index) => ({
+                "@type": "ListItem",
+                position: index + 1,
+                name: crumb.name,
+                item: localizedUrl(locale, crumb.path),
+              })),
+            },
+          ]
+        : []),
     ],
   };
 
@@ -83,20 +119,23 @@ const RootLayout = ({ children, title, description, noindex }: LayoutProps) => {
         <meta name="application-name" content={t.siteName} />
         <meta name="apple-mobile-web-app-title" content={t.siteName} />
 
-        <link rel="canonical" href={canonical} />
-        {LOCALES.map((l) => (
+        {!noindex && <link rel="canonical" href={canonical} />}
+        {!noindex &&
+          LOCALES.map((l) => (
+            <link
+              key={l}
+              rel="alternate"
+              hrefLang={l}
+              href={localizedUrl(l, path)}
+            />
+          ))}
+        {!noindex && (
           <link
-            key={l}
             rel="alternate"
-            hrefLang={l}
-            href={localizedUrl(l, path)}
+            hrefLang="x-default"
+            href={localizedUrl("he", path)}
           />
-        ))}
-        <link
-          rel="alternate"
-          hrefLang="x-default"
-          href={localizedUrl("he", path)}
-        />
+        )}
 
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content={t.siteName} />

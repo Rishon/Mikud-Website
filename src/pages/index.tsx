@@ -1,130 +1,68 @@
-import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
-
-// Components
-import { getZipCode } from "@/services/zipApi";
+import type { GetStaticProps } from "next";
+import Link from "next/link";
 import Layout from "@/components/Layout";
-import AddressInput from "@/components/AddressInput";
-import RecentZipCodes from "@/components/RecentZipCodes";
-import { saveRecentZipCode } from "@/lib/zipHistory";
-import { getTurnstileToken } from "@/lib/turnstile";
-import { useT } from "@/i18n";
+import Markdown from "@/components/Markdown";
+import ZipLookup from "@/components/ZipLookup";
+import { DEFAULT_LOCALE, format, isLocale, useT } from "@/i18n";
+import { loadDocument, type Document } from "@/server/markdown";
+import { getPopularLocalities, localityName } from "@/server/localities";
 
-const inputValue = (id: string) =>
-  (document.getElementById(id) as HTMLInputElement | null)?.value ?? "";
+type CityLink = { slug: string; name: string };
+type Props = { about: Document; popular: CityLink[] };
 
-export default function Home() {
+export const getStaticProps: GetStaticProps<Props> = async ({ locale }) => {
+  const current = isLocale(locale) ? locale : DEFAULT_LOCALE;
+  return {
+    props: {
+      about: loadDocument("home", "about", current),
+      popular: getPopularLocalities(16).map((locality) => ({
+        slug: locality.slug,
+        name: localityName(locality, current),
+      })),
+    },
+  };
+};
+
+export default function Home({ about, popular }: Props) {
   const { t } = useT();
-
-  // Loading
-  const [loading, setLoading] = useState(false);
-
-  // Result
-  const [zipCode, setZipCode] = useState("");
-
-  async function copyToKeyboard() {
-    if (zipCode === "") return;
-    await navigator.clipboard.writeText(zipCode);
-    toast.success(t.toastCopied);
-  }
-
-  async function submitForm() {
-    setLoading(true);
-    setZipCode("");
-
-    const city = inputValue("cityInput");
-    const streetAddress = inputValue("streetInput");
-    const houseNumber = inputValue("houseNumberInput");
-    const entranceNumber = inputValue("entranceInput");
-    const cityId = inputValue("cityIdInput");
-    const streetId = inputValue("streetIdInput");
-
-    if (!city || !streetAddress || !houseNumber || !cityId || !streetId) {
-      toast.error(t.toastMissingFields);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const result = await getZipCode(
-        cityId,
-        streetId,
-        houseNumber,
-        entranceNumber,
-        await getTurnstileToken(),
-      );
-
-      if (!result.success || result.result == undefined) {
-        if (result.error === "rate_limited") toast.error(t.toastRateLimited);
-        else if (result.error) toast.error(t.toastError);
-        else toast.error(t.toastNotFound);
-        return;
-      }
-
-      const zip = result.result.zip;
-      setZipCode(zip);
-      saveRecentZipCode({
-        city,
-        streetAddress,
-        houseNumber,
-        entranceNumber,
-        zipCode: zip,
-      });
-    } catch {
-      toast.error(t.toastError);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <Layout>
-      <Toaster />
       <main className="flex-1 flex flex-col">
-        <div className="flex flex-col md:flex-row flex-1">
-          {/* Form Section */}
-          <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-            {/* Title */}
-            <h1 className="text-mikud-navy text-5xl md:text-6xl font-ibm-bold text-center mb-4">
-              {t.heading}
-            </h1>
-
-            {/* Description */}
-            <p className="text-mikud-navy text-xl md:text-2xl font-ibm-regular text-center mb-8">
-              {t.subheading}
-            </p>
-
-            {/* Address Input */}
-            <AddressInput />
-
-            {/* Buttons */}
-            <div className="flex flex-row-reverse flex-wrap gap-2.5 mt-6 font-ibm-regular justify-center md:justify-end w-full max-w-[720px] px-4 md:px-0">
-              <button
-                onClick={copyToKeyboard}
-                aria-live="polite"
-                className="h-8 rounded-lg bg-mikud-navy-glass text-start px-2.5 text-mikud-navy text-base font-ibm-regular cursor-pointer"
-              >
-                {zipCode === ""
-                  ? t.resultPlaceholder
-                  : `${t.resultPrefix} ${zipCode}`}
-              </button>
-              <button
-                className={`w-32 h-8 rounded-lg bg-mikud-purple text-white text-base cursor-pointer transition-opacity ${
-                  loading ? "opacity-50" : "opacity-100"
-                }`}
-                onClick={submitForm}
-                disabled={loading}
-              >
-                {t.search}
-              </button>
-            </div>
-          </div>
-
-          {/* Recent Zip Codes */}
-          <RecentZipCodes />
-        </div>
+        <ZipLookup heading={t.heading} subheading={t.subheading} />
 
         <div className="h-16 bg-mikud-purple w-full" />
+
+        <section className="px-4 py-12">
+          <div className="mx-auto max-w-3xl text-mikud-navy font-ibm-regular">
+            <h2 className="text-2xl md:text-3xl font-ibm-bold mb-2">
+              {about.title}
+            </h2>
+            <Markdown blocks={about.blocks} />
+
+            <h2 className="text-2xl md:text-3xl font-ibm-bold mt-10 mb-4">
+              {t.popularCitiesTitle}
+            </h2>
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+              {popular.map((city) => (
+                <li key={city.slug}>
+                  <Link
+                    href={`/city/${city.slug}`}
+                    className="block rounded-lg bg-white border border-mikud-navy/20 px-3 py-2 hover:border-mikud-purple hover:text-mikud-purple transition-colors"
+                  >
+                    {format(t.cityHeading, { city: city.name })}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/cities"
+              className="underline underline-offset-2 hover:text-mikud-purple"
+            >
+              {t.allCities}
+            </Link>
+          </div>
+        </section>
       </main>
     </Layout>
   );

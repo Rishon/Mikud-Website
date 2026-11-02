@@ -1,14 +1,14 @@
 import { AppProps } from "next/app";
 import Script from "next/script";
-import { ReactElement, useEffect } from "react";
+import { ReactElement, useEffect, useRef } from "react";
 import {
+  ANALYTICS_ENABLED,
   CLARITY_PROJECT_ID,
   GA_MEASUREMENT_ID,
-  trackPageView,
+  revokeAnalytics,
 } from "@/lib/analytics";
 import { useConsent } from "@/lib/consent";
 import { getStoredLocale } from "@/lib/localePreference";
-import { TURNSTILE_SCRIPT_URL, TURNSTILE_SITE_KEY } from "@/lib/turnstile";
 import { DEFAULT_LOCALE, dictionaries, isLocale } from "@/i18n";
 
 // Styles
@@ -21,6 +21,7 @@ export default function MyApp({
 }: AppProps): ReactElement {
   const locale = isLocale(router.locale) ? router.locale : DEFAULT_LOCALE;
   const consent = useConsent();
+  const analyticsLoaded = useRef(false);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -35,16 +36,14 @@ export default function MyApp({
   }, [locale, router]);
 
   useEffect(() => {
-    router.events.on("routeChangeComplete", trackPageView);
-    return () => router.events.off("routeChangeComplete", trackPageView);
-  }, [router.events]);
+    if (consent === "accepted") analyticsLoaded.current = ANALYTICS_ENABLED;
+    else if (consent === "rejected" && analyticsLoaded.current)
+      revokeAnalytics();
+  }, [consent]);
 
   return (
     <>
-      {TURNSTILE_SITE_KEY && (
-        <Script src={TURNSTILE_SCRIPT_URL} strategy="afterInteractive" />
-      )}
-      {consent === "accepted" && (
+      {ANALYTICS_ENABLED && consent === "accepted" && (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
@@ -53,15 +52,17 @@ export default function MyApp({
           <Script id="gtag-init" strategy="afterInteractive">
             {`window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {analytics_storage: 'granted', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied'});
 gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}');`}
+gtag('config', '${GA_MEASUREMENT_ID}', {allow_google_signals: false});`}
           </Script>
           <Script id="clarity-init" strategy="afterInteractive">
             {`(function(c,l,a,r,i,t,y){
 c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
 t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
 y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-})(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");`}
+})(window, document, "clarity", "script", "${CLARITY_PROJECT_ID}");
+window.clarity('consentv2', {ad_Storage: 'denied', analytics_Storage: 'granted'});`}
           </Script>
         </>
       )}

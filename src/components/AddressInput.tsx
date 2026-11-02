@@ -1,4 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 
 // Components
 import {
@@ -21,12 +26,28 @@ const inputCls =
 const dropdownCls =
   "absolute top-full mt-1 bg-white p-1.5 w-full rounded-xl border border-mikud-navy z-10 shadow-md";
 
-const AddressInput = () => {
+export type Place = { id: string; label: string };
+
+export type AddressInputHandle = {
+  selectStreet: (city: Place, street: Place) => void;
+};
+
+type AddressInputProps = { initialCity?: Place };
+
+const setInputValue = (id: string, value: string) => {
+  const input = document.getElementById(id) as HTMLInputElement | null;
+  if (input) input.value = value;
+};
+
+function AddressInput(
+  { initialCity }: AddressInputProps,
+  ref: React.ForwardedRef<AddressInputHandle>,
+) {
   const { t, locale } = useT();
   const label = (item: any) => (locale === "en" && item.en ? item.en : item.n);
 
   // Selected city/street IDs for the zip lookup
-  const [cityId, setCityId] = useState("");
+  const [cityId, setCityId] = useState(initialCity?.id ?? "");
   const [streetId, setStreetId] = useState("");
 
   // Debounce timers for autocomplete inputs
@@ -41,6 +62,20 @@ const AddressInput = () => {
   const [showCityDatalist, setShowCityDatalist] = useState(false);
   const [showStreetDatalist, setShowStreetDatalist] = useState(false);
   const [showEntranceDatalist, setShowEntranceDatalist] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    selectStreet(city, street) {
+      setCityId(city.id);
+      setStreetId(street.id);
+      setInputValue("cityInput", city.label);
+      setInputValue("streetInput", street.label);
+      setShowCityDatalist(false);
+      setShowStreetDatalist(false);
+      document
+        .getElementById("houseNumberInput")
+        ?.focus({ preventScroll: true });
+    },
+  }));
 
   const handleCityBlur = () => {
     setShowCityDatalist(false);
@@ -62,8 +97,11 @@ const AddressInput = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-2 w-full max-w-[720px] px-4 md:px-0">
-      {/* Hidden inputs carry the IDs for index.tsx to read */}
+    <div
+      data-clarity-mask="True"
+      className="flex flex-col md:flex-row items-center gap-2 w-full max-w-[720px] px-4 md:px-0"
+    >
+      {/* Hidden inputs carry the IDs for ZipLookup to read */}
       <input type="hidden" id="cityIdInput" value={cityId} readOnly />
       <input type="hidden" id="streetIdInput" value={streetId} readOnly />
 
@@ -77,6 +115,7 @@ const AddressInput = () => {
           aria-label={t.cityPlaceholder}
           maxLength={40}
           id="cityInput"
+          defaultValue={initialCity?.label}
           className={inputCls}
           onChange={(e) => {
             // Reset IDs when user types manually
@@ -234,6 +273,6 @@ const AddressInput = () => {
       </div>
     </div>
   );
-};
+}
 
-export default AddressInput;
+export default forwardRef(AddressInput);
