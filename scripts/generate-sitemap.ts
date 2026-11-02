@@ -68,24 +68,15 @@ for (const locality of getLocalities().filter(isIndexable))
 const escapeXml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const urls = pages.flatMap(({ path, lastmod }) => {
-  const alternates = [
-    ...LOCALES.map((l) => [l, localizedUrl(l, path)]),
-    ["x-default", localizedUrl("he", path)],
-  ]
-    .map(
-      ([hreflang, href]) =>
-        `<xhtml:link rel="alternate" hreflang="${hreflang}" href="${escapeXml(href)}"/>`,
-    )
-    .join("");
-  return LOCALES.map(
+const urls = pages.flatMap(({ path, lastmod }) =>
+  LOCALES.map(
     (l) =>
-      `<url><loc>${escapeXml(localizedUrl(l, path))}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}${alternates}</url>`,
-  );
-});
+      `<url><loc>${escapeXml(localizedUrl(l, path))}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`,
+  ),
+);
 
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.join("\n")}
 </urlset>
 `;
