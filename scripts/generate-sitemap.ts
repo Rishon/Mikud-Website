@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { LOCALES } from "../src/i18n";
+import { LOCALES } from "../src/i18n/locales";
 import { SITE_URL, localizedUrl } from "../src/config/site";
 import { getLocalities, isIndexable } from "../src/server/localities";
 

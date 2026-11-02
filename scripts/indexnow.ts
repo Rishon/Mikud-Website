@@ -1,17 +1,32 @@
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { env } from "node:process";
 
+const ROOT = join(import.meta.dirname, "..");
 const SITE_URL = (env.SITE_URL ?? "").replace(/\/+$/, "");
 const KEY = env.INDEXNOW_KEY ?? "";
-const SINCE = env.SINCE ? Date.parse(env.SINCE) : NaN;
 const BATCH_SIZE = 10000;
 
 if (!SITE_URL || !KEY)
   throw new Error("SITE_URL and INDEXNOW_KEY are required");
 
-const response = await fetch(`${SITE_URL}/sitemap.xml`);
-if (!response.ok)
-  throw new Error(`sitemap.xml responded with ${response.status}`);
-const xml = await response.text();
+function commitTime(ref: string | undefined) {
+  if (!ref) return NaN;
+  try {
+    const date = execFileSync("git", ["log", "-1", "--format=%cI", ref], {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    return Date.parse(date.trim());
+  } catch {
+    return NaN;
+  }
+}
+
+const SINCE = commitTime(env.SINCE_REF);
+const xml = readFileSync(join(ROOT, "public", "sitemap.xml"), "utf8");
 
 const entries = [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(
   ([, body]) => ({

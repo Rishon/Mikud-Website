@@ -1,4 +1,4 @@
-import type { Locale } from "@/i18n";
+import type { Locale } from "@/i18n/locales";
 
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://mikud.rishon.systems"
